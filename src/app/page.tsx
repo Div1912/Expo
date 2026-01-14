@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Background } from "@/components/Background";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Shield as ShieldIcon, Globe as GlobeIcon, Zap as ZapIcon } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
-import { Shield as ShieldIcon, Globe as GlobeIcon, Zap as ZapIcon } from "lucide-react";
 
   export default function LandingPage() {
     const containerRef = useRef<HTMLDivElement>(null);

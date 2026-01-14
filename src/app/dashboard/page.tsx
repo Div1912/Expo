@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     async function fetchData() {
       try {
         const [profileRes, balanceRes, historyRes] = await Promise.allSettled([
@@ -27,6 +29,8 @@ export default function DashboardPage() {
           fetch("/api/expo/balance"),
           fetch("/api/payments/history"),
         ]);
+
+        if (!mounted) return;
 
         if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
           const profileData = await profileRes.value.json();
@@ -39,7 +43,6 @@ export default function DashboardPage() {
           router.push("/onboarding");
           return;
         } else if (profileRes.status === 'fulfilled' && profileRes.value.status === 401) {
-          // If unauthorized, the middleware should handle it, but we can also redirect here
           router.push("/auth/login");
           return;
         }
@@ -56,11 +59,12 @@ export default function DashboardPage() {
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     }
 
     fetchData();
+    return () => { mounted = false; };
   }, [router]);
 
   const handleCopy = async () => {

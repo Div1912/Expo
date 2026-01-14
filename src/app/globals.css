@@ -70,7 +70,6 @@
     border-color: var(--border);
   }
   html {
-    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -131,6 +130,16 @@
 
 .perspective-1000 {
   perspective: 1000px;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: var(--star-opacity); transform: scale(1); }
+  50% { opacity: calc(var(--star-opacity) * 0.3); transform: scale(1.2); }
+}
+
+.star {
+  animation: twinkle var(--star-duration) ease-in-out infinite;
+  animation-delay: var(--star-delay);
 }
 
 .glass-card:hover {

@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   description: "Global payments resolved and settled on Stellar.",
 };
 
+import { SmoothScroll } from "@/components/SmoothScroll";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,7 +47,9 @@ export default function RootLayout({
           data-debug="true"
           data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
         />
-        {children}
+        <SmoothScroll>
+          {children}
+        </SmoothScroll>
         <VisualEditsMessenger />
       </body>
     </html>

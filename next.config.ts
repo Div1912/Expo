@@ -25,12 +25,12 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     rules: {
-      "*.{jsx,tsx}": {
-        loaders: [LOADER]
-      }
+      // "*.{jsx,tsx}": {
+      //   loaders: [LOADER]
+      // }
     }
   }
 };
 
 export default nextConfig;
-// Orchids restart: 1768413178325
+// Orchids restart: 1768415477356

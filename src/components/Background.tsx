@@ -66,27 +66,21 @@ export function Background() {
         {/* Bottom Fade */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
 
-        {/* Simple stars - Moved after Bottom Fade for visibility */}
+        {/* Simple stars - Optimized with CSS animations for performance */}
         <div className="absolute inset-0 z-0">
           {stars.map((star, i) => (
-            <motion.div
+            <div
               key={i}
-              animate={{ 
-                opacity: [star.opacity, star.opacity * 0.3, star.opacity],
-                scale: [1, 1.2, 1]
-              }}
-              transition={{ 
-                duration: star.duration, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-              className="absolute bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,1)]"
+              className="star absolute bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,1)]"
               style={{
                 width: star.width,
                 height: star.height,
                 left: star.left,
                 top: star.top,
-              }}
+                '--star-opacity': star.opacity,
+                '--star-duration': `${star.duration}s`,
+                '--star-delay': `${Math.random() * -5}s`,
+              } as any}
             />
           ))}
         </div>
