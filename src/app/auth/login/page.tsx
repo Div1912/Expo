@@ -18,33 +18,53 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    const handleLogin = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!email || !password) return;
+      
+      setLoading(true);
+      setError("");
+  
+      try {
+        const { data, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+  
+        if (loginError) {
+          setError(loginError.message);
+          setLoading(false);
+          return;
+        }
+  
+        if (data.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("universal_id")
+            .eq("id", data.user.id)
+            .maybeSingle();
+  
+          if (profileError) {
+            console.error("Profile fetch error:", profileError);
+            // Even if profile fetch fails, we can try to go to dashboard
+            // or onboarding based on whether we think it's a fatal error.
+            // For now, let's assume if it fails, we should try onboarding.
+            router.push("/onboarding");
+            return;
+          }
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (loginError) {
-      setError(loginError.message);
-      setLoading(false);
-    } else {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("universal_id")
-        .eq("id", data.user.id)
-        .single();
-
-      if (profile?.universal_id) {
-        router.push("/dashboard");
-      } else {
-        router.push("/onboarding");
+          if (profile?.universal_id) {
+            router.push("/dashboard");
+          } else {
+            router.push("/onboarding");
+          }
+        }
+      } catch (err: any) {
+        console.error("Login error:", err);
+        setError("An unexpected error occurred. Please try again.");
+        setLoading(false);
       }
-    }
-  };
+    };
 
   return (
     <div className="relative min-h-screen text-white selection:bg-blue-500/30">

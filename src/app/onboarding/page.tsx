@@ -20,7 +20,30 @@ export default function OnboardingPage() {
   const [txHash, setTxHash] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
+    useEffect(() => {
+      async function checkExisting() {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("universal_id")
+              .eq("id", user.id)
+              .maybeSingle();
+            
+            if (profile?.universal_id) {
+              router.push("/dashboard");
+            }
+          }
+        } catch (err) {
+          console.error("Check existing profile error:", err);
+        }
+      }
+      checkExisting();
+    }, [router]);
+
+    useEffect(() => {
+
     if (username.length < 3) {
       setIsAvailable(null);
       return;

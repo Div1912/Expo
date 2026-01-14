@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,8 +9,10 @@ import { Copy, Check, ArrowUpRight, ArrowDownLeft, QrCode, Scan, History, Loader
 import Link from "next/link";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { copyToClipboard } from "@/lib/clipboard";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [balances, setBalances] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -19,21 +22,37 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-          const [profileRes, balanceRes, historyRes] = await Promise.all([
-            fetch("/api/expo/profile"),
-            fetch("/api/expo/balance"),
-            fetch("/api/payments/history"),
-          ]);
-
-        const [profileData, balanceData, historyData] = await Promise.all([
-          profileRes.json(),
-          balanceRes.json(),
-          historyRes.json(),
+        const [profileRes, balanceRes, historyRes] = await Promise.allSettled([
+          fetch("/api/expo/profile"),
+          fetch("/api/expo/balance"),
+          fetch("/api/payments/history"),
         ]);
 
-        setProfile(profileData);
-        setBalances(balanceData.balances || []);
-        setTransactions(historyData.slice(0, 5) || []);
+        if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
+          const profileData = await profileRes.value.json();
+          setProfile(profileData);
+          if (!profileData.universal_id) {
+            router.push("/onboarding");
+            return;
+          }
+        } else if (profileRes.status === 'fulfilled' && profileRes.value.status === 404) {
+          router.push("/onboarding");
+          return;
+        } else if (profileRes.status === 'fulfilled' && profileRes.value.status === 401) {
+          // If unauthorized, the middleware should handle it, but we can also redirect here
+          router.push("/auth/login");
+          return;
+        }
+
+        if (balanceRes.status === 'fulfilled' && balanceRes.value.ok) {
+          const balanceData = await balanceRes.value.json();
+          setBalances(balanceData.balances || []);
+        }
+
+        if (historyRes.status === 'fulfilled' && historyRes.value.ok) {
+          const historyData = await historyRes.value.json();
+          setTransactions(historyData.slice(0, 5) || []);
+        }
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
@@ -42,13 +61,15 @@ export default function DashboardPage() {
     }
 
     fetchData();
-  }, []);
+  }, [router]);
 
-  const copyToClipboard = () => {
+  const handleCopy = async () => {
     if (profile?.universal_id) {
-      navigator.clipboard.writeText(`${profile.universal_id}@expo`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const success = await copyToClipboard(`${profile.universal_id}@expo`);
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     }
   };
 
@@ -71,14 +92,14 @@ export default function DashboardPage() {
       {/* Header Section */}
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div>
-          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-black tracking-tight mb-4 uppercase leading-[0.9]">
+          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-black tracking-tight mb-4 uppercase leading-[0.9] break-words overflow-wrap-anywhere">
             OVERVIEW
           </h1>
           <div 
-            onClick={copyToClipboard}
-            className="group flex items-center gap-3 px-5 py-2.5 bg-white/5 border border-white/10 rounded-2xl w-fit cursor-pointer hover:bg-white/10 transition-all hover:scale-105 active:scale-95 shadow-xl"
+            onClick={handleCopy}
+            className="group flex items-center gap-3 px-5 py-2.5 bg-white/5 border border-white/10 rounded-2xl w-fit cursor-pointer hover:bg-white/10 transition-all hover:scale-105 active:scale-95 shadow-xl max-w-full"
           >
-            <span className="text-blue-500 font-black text-lg tracking-tight">{profile?.universal_id}@expo</span>
+            <span className="text-blue-500 font-black text-sm md:text-lg tracking-tight truncate max-w-[200px] md:max-w-none">{profile?.universal_id}@expo</span>
             <div className="h-4 w-[1px] bg-white/10" />
             <AnimatePresence mode="wait">
               {copied ? (

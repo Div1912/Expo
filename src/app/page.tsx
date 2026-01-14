@@ -4,12 +4,50 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Background } from "@/components/Background";
 import { motion } from "framer-motion";
-import { ArrowRight, Globe, Shield, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+import { Shield as ShieldIcon, Globe as GlobeIcon, Zap as ZapIcon } from "lucide-react";
 
-export default function LandingPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  export default function LandingPage() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [text, setText] = useState("");
+    const words = ["ROUTER", "NETWORK", "GATEWAY", "PROTOCOL"];
+    const [wordIndex, setWordIndex] = useState(0);
+    
+    useEffect(() => {
+      let currentText = "";
+      let isDeleting = false;
+      let timeout: NodeJS.Timeout;
+  
+      const type = () => {
+        const fullText = words[wordIndex % words.length];
+
+        if (!isDeleting) {
+          currentText = fullText.slice(0, currentText.length + 1);
+          setText(currentText);
+          if (currentText === fullText) {
+            timeout = setTimeout(() => {
+              isDeleting = true;
+              type();
+            }, 2500);
+            return;
+          }
+        } else {
+          currentText = fullText.slice(0, currentText.length - 1);
+          setText(currentText);
+          if (currentText === "") {
+            isDeleting = false;
+            setWordIndex((prev) => prev + 1);
+          }
+        }
+  
+        timeout = setTimeout(type, isDeleting ? 80 : 150);
+      };
+  
+      type();
+      return () => clearTimeout(timeout);
+    }, [wordIndex]);
   
   return (
     <div ref={containerRef} className="relative min-h-screen text-white selection:bg-blue-500/30 overflow-x-hidden">
@@ -18,36 +56,27 @@ export default function LandingPage() {
 
       {/* Hero Section - Maximum Performance */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 flex flex-col items-center justify-center px-4 overflow-hidden">
-        <div className="max-w-5xl mx-auto text-center z-10">
-          <div>
+        <div className="max-w-5xl mx-auto text-center z-10 w-full">
+          <div className="flex flex-col items-center">
             <p className="text-blue-500 uppercase text-[10px] md:text-xs font-bold mb-6 tracking-[0.4em]">
               STELLAR NETWORK
             </p>
-            <h1 className="text-[clamp(2.5rem,10vw,8rem)] font-black tracking-tighter mb-8 leading-[0.85] select-none break-words">
+            <h1 className="text-[clamp(2.5rem,10vw,8rem)] font-black tracking-tighter mb-8 leading-[0.9] select-none text-balance break-words overflow-wrap-anywhere">
               GLOBAL <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-600 to-indigo-600">
                 PAYMENT
               </span> <br />
-              <span className="relative inline-flex gap-[0.05em] text-blue-500">
-                {"ROUTER".split("").map((char, i) => (
-                  <motion.span
-                    key={i}
-                    initial={{ opacity: 0, y: 40, rotateX: -90 }}
-                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                    transition={{
-                      duration: 0.8,
-                      delay: i * 0.1,
-                      ease: [0.215, 0.61, 0.355, 1.0],
-                    }}
-                    className="inline-block origin-bottom"
-                  >
-                    {char}
-                  </motion.span>
-                ))}
+              <span className="relative inline-flex items-center text-blue-500 min-h-[1em] break-all">
+                {text}
+                <motion.span
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                  className="w-[4px] md:w-[8px] h-[0.8em] bg-blue-500 ml-1 inline-block shrink-0"
+                />
               </span>
             </h1>
-            <p className="text-lg md:text-2xl text-zinc-400 mb-10 max-w-2xl mx-auto font-medium leading-relaxed px-4">
-              Register one ID. Send money globally. <span className="text-white font-bold">Settling on Stellar.</span><br />
+            <p className="text-base md:text-2xl text-zinc-400 mb-10 max-w-2xl mx-auto font-medium leading-relaxed px-4 text-balance">
+              Register one ID. Send money globally. <span className="text-white font-bold">Settling on Stellar.</span><br className="hidden md:block" />
               Zero complexity, absolute speed.
             </p>
 
@@ -65,31 +94,25 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-
-        {/* Floating Element for Aesthetic */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full -z-10 pointer-events-none opacity-20">
-           <div className="absolute top-[20%] left-[10%] w-32 h-32 bg-blue-500 blur-[120px] rounded-full animate-pulse" />
-           <div className="absolute bottom-[20%] right-[10%] w-48 h-48 bg-indigo-500 blur-[120px] rounded-full animate-pulse" />
-        </div>
       </section>
 
       {/* Features Section */}
       <section className="relative z-20 py-20 px-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FeatureCard 
-            icon={<Shield className="w-6 h-6 text-blue-400" />}
+            icon={<ShieldIcon className="w-6 h-6 text-blue-400" />}
             title="Non-Custodial"
             description="Your assets are anchored on-chain. We route the logic, you control the wealth."
             delay={0}
           />
           <FeatureCard 
-            icon={<Globe className="w-6 h-6 text-indigo-400" />}
+            icon={<GlobeIcon className="w-6 h-6 text-indigo-400" />}
             title="Universal ID"
             description="Replace long addresses with username@expo. The human way to pay anyone."
             delay={0.1}
           />
           <FeatureCard 
-            icon={<Zap className="w-6 h-6 text-blue-500" />}
+            icon={<ZapIcon className="w-6 h-6 text-blue-500" />}
             title="Stellar Speed"
             description="Finality in 3-5 seconds. Costs a fraction of a cent. Global by default."
             delay={0.2}

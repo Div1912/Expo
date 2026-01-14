@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Check, Share2, Info, Loader2, Sparkles, QrCode } from "lucide-react";
+import { copyToClipboard } from "@/lib/clipboard";
 
 export default function ReceivePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -23,22 +24,24 @@ export default function ReceivePage() {
       });
   }, []);
 
-    const qrData = JSON.stringify({
-      expo: profile?.universal_id ? `${profile.universal_id}@expo` : "",
-      network: "stellar-testnet",
-      type: "payment",
-      amount: amount || undefined,
-      currency: "USDC",
-      note: note || undefined
-    });
+  const qrData = JSON.stringify({
+    expo: profile?.universal_id ? `${profile.universal_id}@expo` : "",
+    network: "stellar-testnet",
+    type: "payment",
+    amount: amount || undefined,
+    currency: "USDC",
+    note: note || undefined
+  });
 
-    const copyToClipboard = () => {
-      if (profile?.universal_id) {
-        navigator.clipboard.writeText(`${profile.universal_id}@expo`);
+  const handleCopy = async () => {
+    if (profile?.universal_id) {
+      const success = await copyToClipboard(`${profile.universal_id}@expo`);
+      if (success) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
-    };
+    }
+  };
 
   if (loading) {
     return (
@@ -78,14 +81,14 @@ export default function ReceivePage() {
             <div className="absolute inset-0 bg-blue-500/5 blur-xl -z-10" />
           </div>
 
-            <div className="text-center space-y-3 w-full px-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500">Universal EXPO ID</p>
-              <h3 className="text-2xl md:text-4xl font-black tracking-tight text-white uppercase break-all">{profile?.universal_id}@expo</h3>
-            </div>
+          <div className="text-center space-y-3 w-full px-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500">Universal EXPO ID</p>
+            <h3 className="text-2xl md:text-4xl font-black tracking-tight text-white uppercase break-all">{profile?.universal_id}@expo</h3>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full">
             <Button 
-              onClick={copyToClipboard} 
+              onClick={handleCopy} 
               className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 text-white font-black text-lg rounded-2xl gap-3 transition-all hover:scale-105 active:scale-95"
             >
               <AnimatePresence mode="wait">
@@ -138,12 +141,12 @@ export default function ReceivePage() {
           </div>
         </div>
         
-          <div className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-            <Info className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-            <p className="text-[10px] font-medium text-zinc-500 leading-relaxed uppercase tracking-wider">
-              Settlement is processed on the Stellar network. Real USDC asset verification is active. This QR follows the universal EXPO protocol.
-            </p>
-          </div>
+        <div className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+          <Info className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
+          <p className="text-[10px] font-medium text-zinc-500 leading-relaxed uppercase tracking-wider">
+            Settlement is processed on the Stellar network. Real USDC asset verification is active. This QR follows the universal EXPO protocol.
+          </p>
+        </div>
       </div>
     </div>
   );

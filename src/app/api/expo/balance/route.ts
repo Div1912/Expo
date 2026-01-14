@@ -9,15 +9,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('stellar_address')
-    .eq('id', user.id)
-    .single();
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('stellar_address')
+      .eq('id', user.id)
+      .maybeSingle();
+  
+    if (error || !profile?.stellar_address) {
+      return NextResponse.json({ balances: [] });
+    }
 
-  if (!profile?.stellar_address) {
-    return NextResponse.json({ error: 'Stellar address not found' }, { status: 404 });
-  }
 
   const balances = await getBalances(profile.stellar_address);
   return NextResponse.json({ balances });

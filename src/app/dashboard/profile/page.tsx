@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Mail, Shield, LogOut, Copy, Check, ExternalLink, Loader2, Wallet, Globe, Lock, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { copyToClipboard } from "@/lib/clipboard";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -30,19 +31,23 @@ export default function ProfilePage() {
     router.push("/");
   };
 
-  const copyId = () => {
+  const copyId = async () => {
     if (profile?.universal_id) {
-      navigator.clipboard.writeText(`${profile.universal_id}@expo`);
-      setCopiedId(true);
-      setTimeout(() => setCopiedId(false), 2000);
+      const success = await copyToClipboard(`${profile.universal_id}@expo`);
+      if (success) {
+        setCopiedId(true);
+        setTimeout(() => setCopiedId(false), 2000);
+      }
     }
   };
 
-  const copyAddr = () => {
+  const copyAddr = async () => {
     if (profile?.stellar_address) {
-      navigator.clipboard.writeText(profile.stellar_address);
-      setCopiedAddr(true);
-      setTimeout(() => setCopiedAddr(false), 2000);
+      const success = await copyToClipboard(profile.stellar_address);
+      if (success) {
+        setCopiedAddr(true);
+        setTimeout(() => setCopiedAddr(false), 2000);
+      }
     }
   };
 

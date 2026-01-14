@@ -8,15 +8,21 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { data, error } = await supabaseAdmin
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+  
+    if (error) {
+      console.error('Profile fetch error:', error);
+      return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
+    }
 
-  if (error) {
-    return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-  }
+    if (!data) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
 
   return NextResponse.json(data);
 }

@@ -96,41 +96,40 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
 
   /* ─ global-error UI ─ */
   return (
-    <html>
-      <body className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-destructive">
-              Something went wrong!
-            </h1>
-            <p className="text-muted-foreground">
-              An unexpected error occurred. Please try again fixing with Orchids
-            </p>
-          </div>
-          <div className="space-y-2">
-            {process.env.NODE_ENV === "development" && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                  Error details
-                </summary>
-                <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
-                  {error.message}
-                  {error.stack && (
-                    <div className="mt-2 text-muted-foreground">
-                      {error.stack}
-                    </div>
-                  )}
-                  {error.digest && (
-                    <div className="mt-2 text-muted-foreground">
-                      Digest: {error.digest}
-                    </div>
-                  )}
-                </pre>
-              </details>
-            )}
-          </div>
+    <div className="fixed inset-0 z-[9999] min-h-screen bg-black text-white flex items-center justify-center p-4">
+      <div className="max-w-md w-full text-center space-y-6 glass-card p-8 rounded-2xl border border-red-500/20">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-black text-red-500 tracking-tight">
+            SOMETHING WENT WRONG
+          </h1>
+          <p className="text-zinc-400 font-medium">
+            An unexpected error occurred. Please try again.
+          </p>
         </div>
-      </body>
-    </html>
+        <div className="space-y-2">
+          {process.env.NODE_ENV === "development" && (
+            <details className="mt-4 text-left">
+              <summary className="cursor-pointer text-sm text-zinc-500 hover:text-zinc-300 font-bold uppercase tracking-widest">
+                Error details
+              </summary>
+              <pre className="mt-2 text-[10px] bg-white/5 p-4 rounded-xl overflow-auto border border-white/10 text-red-400">
+                {error.message}
+                {error.stack && (
+                  <div className="mt-2 opacity-50">
+                    {error.stack}
+                  </div>
+                )}
+              </pre>
+            </details>
+          )}
+        </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="w-full h-12 bg-white text-black font-black rounded-xl hover:bg-zinc-200 transition-all active:scale-95"
+        >
+          RELOAD PAGE
+        </button>
+      </div>
+    </div>
   );
 }
